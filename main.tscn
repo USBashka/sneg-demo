@@ -1,0 +1,102 @@
+[gd_scene load_steps=19 format=3 uid="uid://hp3xx3jc7tvi"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_6ijs8"]
+[ext_resource type="Shader" path="res://sneg.gdshader" id="1_fjco6"]
+[ext_resource type="Script" path="res://main.gd" id="1_llhj3"]
+
+[sub_resource type="Gradient" id="Gradient_0pcry"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_4hbp4"]
+gradient = SubResource("Gradient_0pcry")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+metadata/_snap_enabled = true
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mxara"]
+sky_horizon_color = Color(0.84625, 0.8635, 0.8875, 1)
+ground_bottom_color = Color(1, 1, 1, 1)
+ground_horizon_color = Color(0.84625, 0.8635, 0.8875, 1)
+
+[sub_resource type="Sky" id="Sky_aatr5"]
+sky_material = SubResource("ProceduralSkyMaterial_mxara")
+
+[sub_resource type="Environment" id="Environment_k0u4g"]
+background_mode = 2
+sky = SubResource("Sky_aatr5")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_4sxpo"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_d7hl4"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_p7bb1"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_d7hl4")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u0yv7"]
+render_priority = 0
+shader = ExtResource("1_fjco6")
+shader_parameter/depth = 1.61
+shader_parameter/promenad = SubResource("NoiseTexture2D_p7bb1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2e11q"]
+material = SubResource("ShaderMaterial_u0yv7")
+size = Vector2(128, 128)
+subdivide_width = 1024
+subdivide_depth = 1024
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_s8e63"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_hdgcc"]
+frequency = 0.0473
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vterq"]
+seamless = true
+noise = SubResource("FastNoiseLite_hdgcc")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hrum5"]
+albedo_color = Color(0.529412, 0.290196, 1, 1)
+albedo_texture = SubResource("NoiseTexture2D_vterq")
+metallic = 1.0
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_1dqxl"]
+material = SubResource("StandardMaterial3D_hrum5")
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_llhj3")
+sled = SubResource("GradientTexture2D_4hbp4")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_k0u4g")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Sneg" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Sneg"]
+shape = SubResource("WorldBoundaryShape3D_4sxpo")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Sneg"]
+mesh = SubResource("PlaneMesh_2e11q")
+skeleton = NodePath("../..")
+
+[node name="Player" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.33416, 0)
+script = ExtResource("1_6ijs8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("SphereShape3D_s8e63")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
+mesh = SubResource("SphereMesh_1dqxl")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 0.930309, 0.366777, 0, -0.366777, 0.930309, 0, 1.91498, 2.37566)
+top_level = true
